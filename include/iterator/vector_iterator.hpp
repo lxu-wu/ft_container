@@ -7,23 +7,23 @@
 namespace ft
 {
 	template< class Type>
-	class vector_iterator
+	class vector_iterator : public ft::iterator<ft::random_access_iterator_tag, Type>
 	{
 		public:
 		
 
-			typedef Type													value_type;
-			typedef ft::random_access_iterator_tag							iterator_category;
-			typedef std::ptrdiff_t											difference_type;
-			typedef Type*													pointer;
-			typedef Type&													reference;			
+			// typedef Type													value_type;
+			// typedef ft::random_access_iterator_tag							iterator_category;
+			// typedef std::ptrdiff_t											difference_type;
+			// typedef Type*													pointer;
+			// typedef Type&													reference;			
 
 
-			// typedef typename ft::iterator_traits<Type*>::iterator_category	iterator_category;
-			// typedef typename ft::iterator_traits<Type*>::value_type			value_type;
-			// typedef typename ft::iterator_traits<Type*>::difference_type		difference_type;
-			// typedef typename ft::iterator_traits<Type*>::pointer				pointer;
-			// typedef typename ft::iterator_traits<Type*>::reference			reference;
+		typedef typename ft::iterator<ft::random_access_iterator_tag, Type>::value_type		value_type;
+		typedef typename ft::iterator<ft::random_access_iterator_tag, Type>::iterator_category	iterator_category;
+		typedef typename ft::iterator<ft::random_access_iterator_tag, Type>::difference_type	difference_type;
+		typedef typename ft::iterator<ft::random_access_iterator_tag, Type>::pointer			pointer;
+		typedef typename ft::iterator<ft::random_access_iterator_tag, Type>::reference			reference;
 		
 		protected:
 		
@@ -33,7 +33,7 @@ namespace ft
 		
 			vector_iterator() : _ptr(NULL) {}
 			vector_iterator (pointer ptr) : _ptr(ptr) {}
-			vector_iterator (vector_iterator const &rev_it) {}
+			vector_iterator (vector_iterator const &other) : _ptr(other._ptr) {}
 			virtual ~vector_iterator() {}
 
 			vector_iterator& operator=(vector_iterator<Type> const &other )
@@ -43,6 +43,12 @@ namespace ft
 				return (*this);
 			}
 			
+			// cast en const
+			operator vector_iterator<const Type>() const
+			{
+				return (this->_ptr);
+			}
+
 			reference operator*() const
 			{
 				return *(this->_ptr);
@@ -76,7 +82,7 @@ namespace ft
 			{
 				vector_iterator tmp = *this;
 				--(this->_ptr);
-				return *this;
+				return tmp;
 			}
 
 			vector_iterator operator+(difference_type n) const
@@ -106,40 +112,60 @@ namespace ft
 				return (this->_ptr)[n];
 			}
 
-			bool operator==(const vector_iterator& other) const
-			{
-				return this->_ptr == other._ptr;
-			}
+			template<typename Type1, typename Type2>
+			friend bool operator==(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs);
 
-			bool operator!=(const vector_iterator& other) const
-			{
-				return this->_ptr != other._ptr;
-			}
+			template<typename Type1, typename Type2>
+			friend bool operator!=(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs);
 
-			bool operator<(const vector_iterator& other) const
-			{
-				return this->_ptr < other._ptr;
-			}
+			template<typename Type1, typename Type2>
+			friend bool operator<(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs);
 
-			bool operator>(const vector_iterator& other) const
-			{
-				return this->_ptr > other._ptr;
-			}
+			template<typename Type1, typename Type2>
+			friend bool operator>(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs);
 
-			bool operator<=(const vector_iterator& other) const
-			{
-				return this->_ptr <= other._ptr;
-			}
+			template<typename Type1, typename Type2>
+			friend bool operator<=(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs);
 
-			bool operator>=(const vector_iterator& other) const
-			{
-				return this->_ptr >= other._ptr;
-			}
+			template<typename Type1, typename Type2>
+			friend bool operator>=(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs);
 
-			template<typename T>
-			friend typename vector_iterator<T>::difference_type operator-(const vector_iterator<T>& lhs, const vector_iterator<T>& rhs);
+			template<typename Type1, typename Type2>
+			friend typename vector_iterator<Type1>::difference_type operator-(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs);
+	
 
 	};
+
+		template<typename Type1, typename Type2>
+	bool operator==(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs)
+	{
+		return lhs._ptr == rhs._ptr;
+	}
+	template<typename Type1, typename Type2>
+	bool operator!=(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs)
+	{
+		return lhs._ptr != rhs._ptr;
+	}
+	template<typename Type1, typename Type2>
+	bool operator<(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs)
+	{
+		return lhs._ptr < rhs._ptr;
+	}
+	template<typename Type1, typename Type2>
+	bool operator>(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs)
+	{
+		return lhs._ptr > rhs._ptr;
+	}
+	template<typename Type1, typename Type2>
+	bool operator<=(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs)
+	{
+		return lhs._ptr <= rhs._ptr;
+	}
+	template<typename Type1, typename Type2>
+	bool operator>=(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs)
+	{
+		return lhs._ptr >= rhs._ptr;
+	}
 
 	template<typename T>
 	vector_iterator<T> operator+(typename vector_iterator<T>::difference_type n, const vector_iterator<T>& it)
@@ -147,8 +173,8 @@ namespace ft
 		return it + n;
 	}
 
-	template<typename T>
-	typename vector_iterator<T>::difference_type operator-(const vector_iterator<T>& lhs, const vector_iterator<T>& rhs)
+	template<typename Type1, typename Type2>
+	typename vector_iterator<Type1>::difference_type operator-(const vector_iterator<Type1>& lhs, const vector_iterator<Type2>& rhs)
 	{
 		return lhs._ptr - rhs._ptr;
 	}

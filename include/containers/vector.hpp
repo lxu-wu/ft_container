@@ -29,7 +29,7 @@ namespace ft
 			typedef typename allocator_type::size_type			size_type;
 		
 			typedef ft::vector_iterator<value_type>				iterator;
-            typedef ft::vector_iterator<value_type>				const_iterator;
+            typedef ft::vector_iterator<const value_type>				const_iterator;
             typedef ft::reverse_iterator<iterator>				reverse_iterator;
             typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 
@@ -350,8 +350,9 @@ namespace ft
 			//sigle elem
 			iterator		insert(iterator position, const value_type& val)
 			{
+				difference_type diff = position - this->begin();
 				this->insert(position, 1, val);
-				return (this->_begin + (position - this->_begin));
+				return (this->_begin + diff);
 			}
 			
 			//fill
@@ -360,15 +361,22 @@ namespace ft
 				difference_type diff = position - this->begin();
 				if (this->_size + n > this->_capacity)
 				{
+					
 					if (this->_size + n <= (this->_capacity * 2))
-						reserve(this->_capacity * 2);
+						this->reserve(this->_capacity * 2);
 					else
-						reserve(this->_size + n);
+						this->reserve(this->_size + n);
 				}
-				for (size_type i = (this->_size - 1); i >= diff; i--)
+				// std::cout << "Size: " << this->_size << std::endl;
+				// std::cout << "diff: " << diff << std::endl;
+				if (this->_size)
 				{
-					this->_alloc.construct(this->_begin + i + n, this->_begin[i]);
-					this->_alloc.destroy(this->_begin + i);
+					for (difference_type i = (this->_size - 1); i >= diff; i--)
+					{
+						// std::cout << "i: " << (i + n) << std::endl;
+						this->_alloc.construct(this->_begin + (i + n), this->_begin[i]);
+						this->_alloc.destroy(this->_begin + i);
+					}
 				}
 				for (size_type i = 0; i < n; i++)
 					this->_alloc.construct(this->_begin + diff + i, val);
@@ -377,9 +385,10 @@ namespace ft
 			
 			//range
 			template <class InputIterator>
-			void			insert(iterator position, InputIterator first, InputIterator last)
+			void			insert(iterator position, InputIterator first, InputIterator last,
+			typename ft::enable_if<!ft::is_integral<InputIterator>::value>::type* = NULL)
 			{
-				difference_type size = std::distance(first, last);
+				difference_type size = ft::distance(first, last);
 				difference_type diff = position - this->begin();
 				if (this->_size + size > this->_capacity)
 				{
@@ -388,48 +397,44 @@ namespace ft
 					else
 						reserve(this->_size + size);
 				}
-				for (size_type i = (this->_size - 1); i >= diff; i--)
+				for (difference_type i = (this->_size - 1); i >= diff; i--)
 				{
+					// std::cout << "i: " << i << std::endl;
 					this->_alloc.construct(this->_begin + i + size, this->_begin[i]);
 					this->_alloc.destroy(this->_begin + i);
 				}
-				for (size_type i = 0; i < size; i++)
-					this->_alloc.construct(this->_begin + diff + i, *(first++));
+				for (size_type i = 0; i < size; i++, first++)
+					this->_alloc.construct(this->_begin + diff + i, *(first));
 				this->_size += size;
 			}
 
 			iterator		erase(iterator position)
 			{
 				difference_type diff = position - this->begin();
+				this->_alloc.destroy(this->_begin + diff);
+				// std::cout << diff << std::endl;
 				for (size_type i = diff; i < this->_size - 1; i++)
 				{
 					this->_alloc.destroy(this->_begin + i);
 					this->_alloc.construct(this->_begin + i, this->_begin[i + 1]);
 				}
-				this->_alloc.destroy(this->_begin + this->_size - 1);
-				this->_size--;
+				if (diff < this->_size)
+					this->_size--;
 				return (this->_begin + diff);
 			}
 
 			iterator		erase (iterator first, iterator last)
 			{
-				difference_type size = last - first;
+				difference_type size = ft::distance(first, last);
 				difference_type diff = first - this->begin();
-				if (this->_size - size > 0)
+				for (size_type i = diff; i < this->_size; i++)
 				{
-					for (size_type i = 0; i < size; i++)
-					{
-						this->_alloc.destroy(this->_begin + diff + i);
-						this->_alloc.construct(this->_begin + diff + i, this->_begin[diff + i]);
-					}
-					this->_size -= size;
+					this->_alloc.destroy(this->_begin + i);
+					this->_alloc.construct(this->_begin + i, this->_begin[i + size]);
 				}
-				else
-				{
-					for (size_type i = 0; i < size; i++)
-						this->_alloc.destroy(this->_begin + diff + i);
-					this->_size = 0;
-				}
+				for (size_type i = this->_size - size; i < this->_size; i++)
+					this->_alloc.destroy(this->_begin + i);
+				this->_size -= size;
 				return (this->_begin + diff);
 			}
 
