@@ -84,7 +84,7 @@ namespace ft
 
 			// copy constructor
 			vector (const vector& other)
-			: _begin(NULL), _size(other._size), _capacity(other._capacity), _alloc(other._alloc)
+			: _begin(NULL), _size(other._size), _capacity(other._size), _alloc(other._alloc)
 			{
 				this->_begin = this->_alloc.allocate(other._size);
 				for (size_type i = 0; i < other._size; i++)
@@ -175,9 +175,9 @@ namespace ft
 				if (n > this->_capacity)
 				{
 					if (n <= (this->_capacity * 2))
-						reserve(this->_capacity * 2);
+						this->reserve(this->_capacity * 2);
 					else
-						reserve(n);
+						this->reserve(n);
 				}
 				else if (n < this->_size)
 				{
@@ -204,6 +204,9 @@ namespace ft
 
 			void		reserve(size_type n)
 			{
+				// std::cout << "n: " << n << std::endl;
+				// std::cout << "capacity: " << this->_capacity << std::endl;
+
 				if (n > this->max_size())
 				{
 					throw std::length_error("vector::reserve");
@@ -214,9 +217,20 @@ namespace ft
 					// std::cout << "Size: " << this->_size << std::endl;
 					// std::cout << "Capacity: " << this->_capacity << std::endl;
 					pointer tmp = this->_alloc.allocate(n);
+					// std::cout << "new n: " << n << std::endl;
 					// std::cout << "tmp: " << tmp << std::endl;
+					// print vector
+					// std::cout << "print vector" << std::endl;
+					// for (size_type i = 0; i < this->_size; i++)
+					// 	std::cout << this->_begin[i] << " ";
+					// std::cout << std::endl;
+					// std::cout << "size: " << this->_size << std::endl;
 					for (size_type i = 0; i < this->_size; i++)
+					{
+						// std::cout << "beg: " << this->_begin[i] << std::endl;
+						// std::cout << "reserve: " << i  << ": " << this->_begin[i] << std::endl;
 						this->_alloc.construct(tmp + i, this->_begin[i]);
+					}
 					for (size_type i = 0; i < this->_size; i++)
 						this->_alloc.destroy(this->_begin + i);
 					this->_alloc.deallocate(this->_begin, this->_capacity);
@@ -328,16 +342,26 @@ namespace ft
 	
 			void			push_back(const value_type& val)
 			{
+				// std::cout << "capacity: " << this->_capacity << std::endl;
 				if (this->_size < this->_capacity)
 				{
-					// std::cout << "Size: " << this->_size << std::endl;
 					this->_alloc.construct(this->_begin + this->_size, val);
 					this->_size++;
 				}
 				else
 				{
+					// std::cout << "capacity: " << this->_capacity << std::endl;
 					this->resize(this->_size + 1, val);
+					// for(size_type i = 0; i < this->_size; i++)
+					// 	std::cout << this->_begin[i] << " ";
+					// std::cout << "capacity: " << this->_capacity << std::endl;
 				}
+				// std::cout << "Capacity: " << this->_capacity << std::endl;
+				// std::cout << "Size: " << this->_size << std::endl;
+				// std::cout << "val: " << val << std::endl;
+				// // print the vector
+				// for (size_type i = 0; i < this->_size; i++)
+				// 	std::cout << "push_back: " << i  << ": " << this->_begin[i] << std::endl;
 			}
 
 			void			pop_back()
